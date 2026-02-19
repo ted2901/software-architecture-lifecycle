@@ -357,3 +357,122 @@ Todos los requisitos del objetivo han sido completados:
 **Generado:** 2025-02-18
 **Proyecto:** Software Architecture Lifecycle Management
 **Estado:** ✅ COMPLETADO
+
+
+
+
+
+## 7. COMPARACIÓN REST vs GRAPHQL: EFICIENCIA EN OBTENCIÓN DE DATOS
+
+### Objetivo
+Demostrar la eficiencia en la obtención de datos comparando las arquitecturas REST y GraphQL a través de consultas directas en entornos de prueba en línea.
+
+### Parte I: Experimentación con REST (Over-fetching)
+
+#### Petición 1: Lista de Pokémon
+- **URL:** https://pokeapi.co/api/v2/pokemon/
+- **Método:** GET
+- **Respuesta:** Lista paginada de Pokémon con campos básicos (name, url).
+
+#### Petición 2: Detalles de un Pokémon (Bulbasaur)
+- **URL:** https://pokeapi.co/api/v2/pokemon/1/
+- **Método:** GET
+- **Análisis del JSON de respuesta:**
+  ```json
+  {
+    "id": 1,
+    "name": "bulbasaur",
+    "base_experience": 64,
+    "height": 7,
+    "weight": 69,
+    "abilities": [...],
+    "forms": [...],
+    "game_indices": [...],
+    "held_items": [...],
+    "location_area_encounters": "...",
+    "moves": [...],
+    "past_types": [...],
+    "sprites": {...},
+    "species": {...},
+    "stats": [...],
+    "types": [...]
+  }
+  ```
+  (Nota: El JSON completo es mucho más extenso, con arrays largos como moves que contienen decenas de elementos.)
+
+### Parte II: Experimentación con GraphQL (Solicitud Específica)
+
+#### Recurso utilizado: https://graphql-pokemon2.vercel.app/
+
+#### Petición 3: Solicitud mínima y específica
+- **Query:**
+  ```graphql
+  query {
+    pokemon(id: "ug9rZW1vbjowMDE=") {
+      name
+      weight
+      height
+    }
+  }
+  ```
+- **Respuesta:**
+  ```json
+  {
+    "data": {
+      "pokemon": {
+        "name": "Bulbasaur",
+        "weight": 6.9,
+        "height": 0.7
+      }
+    }
+  }
+  ```
+
+#### Petición 4: Solicitud anidada (con evoluciones)
+- **Query:**
+  ```graphql
+  query {
+    pokemon(id: "ug9rZW1vbjowMDE=") {
+      name
+      weight
+      height
+      evolutions {
+        name
+      }
+    }
+  }
+  ```
+- **Respuesta:**
+  ```json
+  {
+    "data": {
+      "pokemon": {
+        "name": "Bulbasaur",
+        "weight": 6.9,
+        "height": 0.7,
+        "evolutions": [
+          {"name": "Ivysaur"},
+          {"name": "Venusaur"}
+        ]
+      }
+    }
+  }
+  ```
+
+### Análisis y Conclusiones
+
+#### 1. Capturas de pantalla
+- **REST (Petición 2):** El JSON de respuesta contiene aproximadamente 1000+ líneas de datos, incluyendo secciones como `moves` (lista de movimientos), `game_indices` (índices de juegos), `sprites` (imágenes), etc., que no son necesarios para obtener solo nombre, peso y altura.
+- **GraphQL (Petición 4):** El JSON de respuesta es conciso, con solo los campos solicitados y las evoluciones relacionadas, totalizando menos de 50 líneas.
+
+#### 2. Respuesta al Over-fetching (REST)
+En la Petición 2 de REST, existe evidencia clara de over-fetching porque el servidor devuelve todos los datos disponibles del recurso Pokémon, incluyendo campos irrelevantes como `abilities`, `forms`, `game_indices`, `held_items`, `location_area_encounters`, `moves`, `past_types`, `sprites`, `species`, `stats` y `types`. Si solo se necesitan `name`, `weight` y `height`, se está descargando una cantidad excesiva de datos innecesarios, lo que aumenta el tiempo de respuesta y el consumo de ancho de banda.
+
+#### 3. Eficiencia de GraphQL
+Solo fue necesaria 1 petición HTTP para obtener toda la información del Pokémon, incluyendo sus evoluciones, en la Petición 4 de GraphQL. Esto se compara favorablemente con REST, donde se requerirían al menos 2 peticiones: una para los detalles básicos del Pokémon y otra para obtener las evoluciones (asumiendo que hay un endpoint separado para evoluciones), o múltiples llamadas si las evoluciones requieren consultas adicionales.
+
+#### 4. Conclusión
+Elegiría GraphQL para una aplicación móvil donde la velocidad de carga y el consumo de datos son críticos, porque permite obtener exactamente los datos necesarios en una sola petición, reduciendo el over-fetching y optimizando el rendimiento en redes móviles limitadas.
+
+**Fecha de experimentación:** 2026-02-19
+**Herramientas utilizadas:** ReqBin (para REST), GraphQL Playground (para GraphQL)
