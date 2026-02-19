@@ -1,4 +1,4 @@
-# Diseño de Endpoints REST - API del Sistema
+# Diseño de Endpoints REST - API  Sistema
 
 ## Resumen Ejecutivo
 Este documento define los endpoints REST para la API principal del sistema de arquitectura de software. La API utiliza principios RESTful, soporta paginación, filtrado y fuerza versioning mediante URL.
